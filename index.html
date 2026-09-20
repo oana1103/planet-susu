@@ -168,7 +168,8 @@
     .instant-camera{display:block;width:min(410px,82%);height:auto;object-fit:contain;position:relative;z-index:3;opacity:0;visibility:hidden;filter:drop-shadow(0 16px 18px rgba(63,52,60,.16))}
     .camera-scene.focus-mode .instant-camera{opacity:1;visibility:visible}
     .polaroid-output{position:absolute;z-index:2;top:356px;width:min(330px,68%);aspect-ratio:1.274;background:transparent;translate:0 -190px;opacity:0;transform:rotate(0deg);pointer-events:none}
-    .polaroid-image{position:absolute;z-index:1;left:4.4%;top:8.2%;width:91.8%;height:73.1%;overflow:hidden;background:#fff}
+    /* Match the actual opening in the frame artwork, not the outer paper bounds. */
+    .polaroid-image{position:absolute;z-index:1;left:2.15%;top:8.1%;width:91.7%;height:73.5%;overflow:hidden;background:#fff}
     .polaroid-image img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#fff;filter:none;opacity:.18;transition:opacity 1.8s ease}
     .polaroid-frame{position:absolute;z-index:2;left:-13.7%;top:-28.6%;width:123%;height:157%;object-fit:fill;mix-blend-mode:multiply;pointer-events:none}
     .polaroid-caption{position:absolute;z-index:3;left:5%;right:5%;bottom:5.5%;text-align:center;font-size:clamp(13px,1.3vw,18px);color:#9b657c;opacity:0;transition:opacity .6s ease}
@@ -865,7 +866,7 @@
         index++;renderLetterProgress(index);
         if(index>=letterText.length){setTypingSkip(null);target.classList.remove('writing');letterTimer=setTimeout(()=>consent.classList.add('ready'),500);return}
         const character=letterText[index-1];
-        letterTimer=setTimeout(tick,character==='\n'?420:/[，。！？？、…]/.test(character)?320:80);
+        letterTimer=setTimeout(tick,character==='\n'?500:/[，。！？？、…]/.test(character)?380:95);
       };
       letterTimer=setTimeout(tick,320);
     }
@@ -1192,7 +1193,7 @@
         const canvas=document.createElement('canvas'),w=1200,h=w/1.274,ox=w*.137,oy=h*.286;
         canvas.width=Math.ceil(w*1.23);canvas.height=Math.ceil(h*1.57);
         const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
-        const x=ox+w*.044,y=oy+h*.082,pw=w*.918,ph=h*.731;
+        const x=ox+w*.0215,y=oy+h*.081,pw=w*.917,ph=h*.735;
         const scale=Math.max(pw/photo.naturalWidth,ph/photo.naturalHeight),sw=pw/scale,sh=ph/scale;
         ctx.filter='none';
         ctx.drawImage(photo,(photo.naturalWidth-sw)/2,(photo.naturalHeight-sh)/2,sw,sh,x,y,pw,ph);
