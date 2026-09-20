@@ -696,7 +696,7 @@
         <button id="epilogue-return" data-go="menu" hidden>回到我们的星球 ✦</button>
       </div>
     </section>
-    <audio id="bgm" preload="metadata"></audio>
+    <audio id="bgm" preload="auto"></audio>
 
   </main>
   <div class="tools"><div class="music-control"><button class="icon-btn" id="music-toggle" aria-label="播放背景音乐" aria-expanded="false">♫</button><div class="music-panel" id="music-panel"><h3>Planet Susu BGM <span class="music-status" id="music-status"></span></h3><p>点一首，让星球慢慢转起来。</p><button class="track-choice active" data-track="0">和你 · 缘_言抖音分享<small>愿爱如晚霞，渐晚渐浓</small></button><button class="track-choice" data-track="1">쿵쿵쿵 · Vincent Blue<small>THUMPING / official preview</small></button><button class="track-choice" data-track="2">我想我会 · 尹露浠<small>当我飞奔向你 · 片尾曲</small></button><button class="track-choice" data-track="3">Timing · KOYO<small>换乘恋爱2 · OST</small></button></div></div></div>
@@ -769,6 +769,8 @@
     memoryVideo.addEventListener('pause',playMusicIfAllowed);
     memoryVideo.addEventListener('ended',playMusicIfAllowed);
     bgm.addEventListener('play',()=>{if(memoryIsPlaying())bgm.pause()});
+    // Attempt audible playback on entry; the browser may require a user gesture.
+    setTrack(4,true);
     function refreshMemoryProgress(){
       const stars=[...document.querySelectorAll('[data-memory]')];
       stars.forEach(star=>{const seen=savedProgress.memories.includes(star.dataset.memory);star.classList.toggle('is-discovered',seen);star.setAttribute('aria-label',`${star.dataset.memory}，${seen?'已点亮':'未点亮'}，打开回忆`)});
@@ -897,8 +899,8 @@
       if(name==='welcome'||name==='letter')prepareShutterAudio();
       if(memoryModal.open) closeMemory();
       screens.forEach(screen=>screen.classList.toggle('active',screen.dataset.screen===name));
-      // START supplies the user gesture required for audible playback; keep manual mute thereafter.
-      if(name==='welcome'&&!bgm.src)setTrack(4,true);
+      // Retry blocked autoplay on START without restarting music or overriding manual mute.
+      if(name==='welcome'&&musicWanted&&bgm.paused)playMusicIfAllowed();
       if(sceneTracks[name]!==undefined&&currentTrack!==sceneTracks[name])setTrack(sceneTracks[name],musicWanted);
       if(name==='memories') requestAnimationFrame(layoutMemorySpiral);
       if(name==='letter') startLetter();
