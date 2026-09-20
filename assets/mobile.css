@@ -1,5 +1,7 @@
 /* Responsive refinements: keep the artwork and handwriting, let content fit. */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.polaroid-output{margin:0}
+.selected-copy::before{content:attr(data-selection);display:block;font:12px/1.6 "PingFang SC",sans-serif;color:#99859a;margin-bottom:5px}
 button,a,select{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .letter-consent.ready{opacity:1;transform:none}
 .music-control[data-notice]:not([data-notice=""])::before{content:attr(data-notice);position:absolute;right:54px;top:8px;width:max-content;max-width:min(230px,calc(100vw - 90px));padding:6px 10px;border-radius:14px;background:rgba(255,250,247,.94);color:#925f76;font:13px/1.4 "PingFang SC",sans-serif;pointer-events:none}
@@ -57,6 +59,7 @@ button,a,select{touch-action:manipulation;-webkit-tap-highlight-color:transparen
   [data-screen="fourcut"] .shoot-btn{min-height:52px;font-size:23px;margin:0;white-space:normal}
   .camera-scene.focus-mode{padding-top:calc(60px + env(safe-area-inset-top));--final-photo-width:min(400px,76vw,calc((100dvh - 200px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * .80))}
   .camera-scene.focus-mode .polaroid-output{padding:0;margin:0}
+  .camera-scene.focus-mode.has-photo .polaroid-output{left:calc(50% + var(--final-photo-width) * .0226);translate:none;transform:translate(-50%,-50%) rotate(-1.2deg);animation:mobile-photo-center .65s ease-out both}
   body:has(.camera-scene.focus-mode) .screen.active,body:has(.camera-scene.focus-mode) .topbar{visibility:hidden}
   .camera-scene.focus-mode.has-photo{background:linear-gradient(135deg,#faf2f2,#f1edf7 70%,#edf2f9)}
   .polaroid-frame{clip-path:polygon(9.3% 18.1%,90.6% 18.1%,90.6% 82%,9.3% 82%)}
@@ -121,3 +124,4 @@ button,a,select{touch-action:manipulation;-webkit-tap-highlight-color:transparen
   /* No cursor to follow on touch screens; keep the scene's own gentle animation. */
   .cover-pointer-effects{display:none}
 }
+@keyframes mobile-photo-center{from{transform:translate(-50%,calc(-50% + 24px)) rotate(-1.2deg) scale(.9)}to{transform:translate(-50%,-50%) rotate(-1.2deg) scale(1)}}

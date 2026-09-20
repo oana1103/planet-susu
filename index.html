@@ -541,7 +541,7 @@
       .cover-launch{left:23%;bottom:12%;font-size:28px}
     }
   </style>
-  <link rel="stylesheet" href="./assets/mobile.css">
+  <link rel="stylesheet" href="./assets/mobile.css?v=20260920-camera2">
 </head>
 <body>
   <main class="app">
@@ -610,12 +610,6 @@
           <div class="polaroid-stage">
             <div class="camera-scene" id="camera-scene" aria-live="polite">
               <canvas class="confetti-canvas" id="confetti" aria-hidden="true"></canvas>
-              <img class="capture-doodle doodle-heart" loading="lazy" decoding="async" src="./assets/doodles/heart.png" alt="">
-              <img class="capture-doodle doodle-star" loading="lazy" decoding="async" src="./assets/doodles/sparkle-eight.png" alt="">
-              <img class="capture-doodle doodle-music" loading="lazy" decoding="async" src="./assets/doodles/music-double.png" alt="">
-              <img class="capture-doodle doodle-flower" loading="lazy" decoding="async" src="./assets/doodles/flower.png" alt="">
-              <img class="capture-doodle doodle-moon" loading="lazy" decoding="async" src="./assets/doodles/moon.png" alt="">
-              <img class="capture-doodle doodle-rays" loading="lazy" decoding="async" src="./assets/doodles/sparkle-rays.png" alt="">
               <img class="instant-camera" loading="lazy" decoding="async" src="./assets/camera/polaroid-onestep2.webp" alt="" aria-hidden="true">
               <button class="photo-back" id="photo-back" aria-label="返回选择穿搭">←</button>
               <figure class="polaroid-output">
@@ -1055,16 +1049,33 @@
       return task;
     }
     const cameraHome=document.querySelector('.polaroid-stage');
-    function selectLook(option){
+    const outfitList=document.querySelector('.outfit-list');
+    let outfitScrollTimer;
+    function nearestOutfit(){
+      const box=outfitList.getBoundingClientRect(),center=box.left+box.width/2;
+      return [...outfitList.querySelectorAll('.outfit-option')].reduce((nearest,item)=>{
+        const distance=node=>{const r=node.getBoundingClientRect();return Math.abs(r.left+r.width/2-center)};
+        return !nearest||distance(item)<distance(nearest)?item:nearest;
+      },null);
+    }
+    function syncVisibleOutfit(){
+      if(shooting||!document.querySelector('[data-screen="fourcut"]').classList.contains('active')||document.querySelector('#camera-scene').classList.contains('focus-mode'))return;
+      const option=nearestOutfit();
+      if(option&&!option.classList.contains('active'))selectLook(option,false);
+    }
+    outfitList.addEventListener('scroll',()=>{clearTimeout(outfitScrollTimer);outfitScrollTimer=setTimeout(syncVisibleOutfit,120)},{passive:true});
+    outfitList.addEventListener('scrollend',syncVisibleOutfit);
+    function selectLook(option,center=true){
       if(shooting) return;
-      document.querySelectorAll('.outfit-option').forEach(item=>item.classList.toggle('active',item===option));
+      document.querySelectorAll('.outfit-option').forEach(item=>{item.classList.toggle('active',item===option);item.setAttribute('aria-pressed',String(item===option))});
       const {look}=option.dataset;
       selectedPhoto=`./assets/fourcut/white/look-${look}.png`;
       preloadPhoto(selectedPhoto).catch(()=>{});
       const name=lookNames[Number(look)-1];
       document.querySelector('#selected-look-name').textContent=name;
+      document.querySelector('.selected-copy').dataset.selection=look+' / 10 · 已选中';
       document.querySelector('#polaroid-caption').textContent=`${name} · PLANET SUSU`;
-      option.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      if(center)option.scrollIntoView({behavior:'instant',block:'nearest',inline:'center'});
       const scene=document.querySelector('#camera-scene');scene.classList.remove('focus-mode','is-shooting','is-ejecting','has-photo');
       if(scene.parentElement!==cameraHome) cameraHome.appendChild(scene);
       const shoot=document.querySelector('#shoot-fourcut');shoot.textContent='📷　按下快门';shoot.classList.remove('is-done');
@@ -1151,6 +1162,9 @@
     }
     async function shootFourcut(){
       if(shooting) return;
+      clearTimeout(outfitScrollTimer);
+      outfitList.scrollTo({left:outfitList.scrollLeft,behavior:'instant'});
+      syncVisibleOutfit();
       prepareShutterAudio();
       shooting=true;
       const scene=document.querySelector('#camera-scene');
@@ -1225,7 +1239,9 @@
       const scrollButton=event.target.closest('[data-scroll]');
       if(scrollButton){
         const list=scrollButton.parentElement.querySelector('.outfit-list');
-        list.scrollBy({left:(scrollButton.dataset.scroll==='next'?1:-1)*list.clientWidth*.72,behavior:'smooth'});
+        const options=[...list.querySelectorAll('.outfit-option')];
+        const current=options.indexOf(list.querySelector('.outfit-option.active'));
+        selectLook(options[Math.max(0,Math.min(options.length-1,current+(scrollButton.dataset.scroll==='next'?1:-1)))]);
       }
       if(event.target.closest('#shoot-fourcut')) shootFourcut();
       if(event.target.closest('#overlay-again')) closePhoto();
