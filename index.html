@@ -778,7 +778,7 @@
     }
     document.querySelector('#memory-picker').addEventListener('change',event=>{const star=[...document.querySelectorAll('[data-memory]')].find(s=>s.dataset.memory===event.target.value);if(star)openMemory(star)});
     memoryVideo.addEventListener('ended',()=>{
-      const date=memoryVideo.dataset.memory;if(!date)return;
+      const date=memoryVideo.dataset.memoryDate;if(!date)return;
       const fresh=!savedProgress.memories.includes(date);if(fresh)savedProgress.memories.push(date);
       refreshMemoryProgress();
       const note=memoryModal.querySelector('.memory-note');note.classList.add('is-discovered');note.textContent=fresh?'✦ 这段回忆，已经变成一颗亮着的星星。':'✦ 这颗星星，一直为你亮着。';
@@ -791,7 +791,7 @@
     }
     function openMemory(memory){
       const date=memory.dataset.memory;
-      memoryVideo.dataset.memory=date;
+      memoryVideo.dataset.memoryDate=date;
       const note=memoryModal.querySelector('.memory-note'),seen=savedProgress.memories.includes(date);note.classList.toggle('is-discovered',seen);note.textContent=seen?'✦ 这颗星星，一直为你亮着。':'这一颗星星，藏着这一天。';
       document.querySelectorAll('[data-memory]').forEach(item=>item.classList.toggle('active',item===memory));
       memoryVideo.pause();memoryVideo.src=`./assets/memories/${date}.mp4`;memoryVideo.load();
@@ -1200,7 +1200,7 @@
       if(event.target.closest('#overlay-again')) closePhoto();
       if(event.target.closest('#photo-back')) closePhoto();
       if(event.target.closest('#download-polaroid')) downloadPolaroid();
-      const memory=event.target.closest('[data-memory]');
+      const memory=event.target.closest('button.star[data-memory]');
       if(memory) openMemory(memory);
       if(event.target.closest('#memory-close')||event.target===memoryModal) closeMemory();
       const pickScene=event.target.closest('[data-pick-scene]');
