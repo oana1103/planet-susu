@@ -618,7 +618,7 @@
               <img class="instant-camera" loading="lazy" decoding="async" src="./assets/camera/polaroid-onestep2.webp" alt="" aria-hidden="true">
               <button class="photo-back" id="photo-back" aria-label="返回选择穿搭">←</button>
               <figure class="polaroid-output">
-                <div class="polaroid-image"><img id="polaroid-photo" decoding="async" src="./assets/fourcut/look-01.jpg" alt="拍下的双人合照"></div>
+                <div class="polaroid-image"><img id="polaroid-photo" decoding="async" src="./assets/fourcut/white/look-01.png" alt="拍下的双人合照"></div>
                 <img class="polaroid-frame" loading="lazy" decoding="async" src="./assets/camera/polaroid-frame.webp" alt="">
                 <figcaption class="polaroid-caption" id="polaroid-caption">CITY WALK · PLANET SUSU</figcaption>
               </figure>
@@ -1035,7 +1035,7 @@
     selectLoveScene('aquarium');
 
     const lookNames=['CITY WALK','BLUE DATE','SUNDAY CLUB','LITTLE TRIP','MILK TEA DAY','SWEET ESCAPE','ANGEL & DEVIL','SUMMER STORY','MIDNIGHT DATE','OUR FAVORITE'];
-    let selectedPhoto='./assets/fourcut/look-01.jpg';
+    let selectedPhoto='./assets/fourcut/white/look-01.png';
     let shooting=false;
     const photoLoads=new Map();
     function preloadPhoto(src){
@@ -1056,8 +1056,8 @@
     function selectLook(option){
       if(shooting) return;
       document.querySelectorAll('.outfit-option').forEach(item=>item.classList.toggle('active',item===option));
-      const {look,ext}=option.dataset;
-      selectedPhoto=`./assets/fourcut/look-${look}.${ext}`;
+      const {look}=option.dataset;
+      selectedPhoto=`./assets/fourcut/white/look-${look}.png`;
       preloadPhoto(selectedPhoto).catch(()=>{});
       const name=lookNames[Number(look)-1];
       document.querySelector('#selected-look-name').textContent=name;
@@ -1177,7 +1177,7 @@
     let exportAssetsPromise;
     function loadExportAssets(){
       if(window.polaroidExportAssets)return Promise.resolve();
-      if(!exportAssetsPromise)exportAssetsPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./assets/polaroid-export.js';script.onload=resolve;script.onerror=()=>{exportAssetsPromise=null;script.remove();reject(new Error('Photo assets unavailable'))};document.head.append(script)});
+      if(!exportAssetsPromise)exportAssetsPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./assets/polaroid-export-white.js';script.onload=resolve;script.onerror=()=>{exportAssetsPromise=null;script.remove();reject(new Error('Photo assets unavailable'))};document.head.append(script)});
       return exportAssetsPromise;
     }
     async function downloadPolaroid(){
