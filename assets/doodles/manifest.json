@@ -1,0 +1,21 @@
+{
+  "source": "用户手绘小元素（2026-09-10）",
+  "usage": "全部为白色线稿、透明背景 PNG；网页中建议作为 CSS mask 使用，以便灵活改变颜色、大小和透明度。",
+  "items": [
+    {"id":"music-double","label":"双连音符","file":"music-double.png"},
+    {"id":"treble-clef","label":"高音谱号","file":"treble-clef.png"},
+    {"id":"flower","label":"小花","file":"flower.png"},
+    {"id":"star-five","label":"手绘五角星","file":"star-five.png"},
+    {"id":"music-note","label":"单音符","file":"music-note.png"},
+    {"id":"tulip","label":"郁金香","file":"tulip.png"},
+    {"id":"sparkle-cross","label":"十字星光","file":"sparkle-cross.png"},
+    {"id":"cloud","label":"云朵","file":"cloud.png"},
+    {"id":"curved-arrow","label":"弯曲箭头","file":"curved-arrow.png"},
+    {"id":"sparkle-rays","label":"放射星光","file":"sparkle-rays.png"},
+    {"id":"heart","label":"爱心","file":"heart.png"},
+    {"id":"star-four","label":"四角星","file":"star-four.png"},
+    {"id":"sparkle-eight","label":"八角星光","file":"sparkle-eight.png"},
+    {"id":"play","label":"播放符号","file":"play.png"},
+    {"id":"moon","label":"月亮","file":"moon.png"}
+  ]
+}
