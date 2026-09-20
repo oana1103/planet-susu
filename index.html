@@ -169,13 +169,13 @@
     .camera-scene.focus-mode .instant-camera{opacity:1;visibility:visible}
     .polaroid-output{position:absolute;z-index:2;top:356px;width:min(330px,68%);aspect-ratio:1.274;background:transparent;translate:0 -190px;opacity:0;transform:rotate(0deg);pointer-events:none}
     .polaroid-image{position:absolute;z-index:1;left:4.4%;top:8.2%;width:91.8%;height:73.1%;overflow:hidden;background:#fff}
-    .polaroid-image img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#fff;filter:contrast(1.02) brightness(1.4) saturate(.3);opacity:.18;transition:filter 1.8s ease,opacity 1.8s ease}
+    .polaroid-image img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#fff;filter:none;opacity:.18;transition:opacity 1.8s ease}
     .polaroid-frame{position:absolute;z-index:2;left:-13.7%;top:-28.6%;width:123%;height:157%;object-fit:fill;mix-blend-mode:multiply;pointer-events:none}
     .polaroid-caption{position:absolute;z-index:3;left:5%;right:5%;bottom:5.5%;text-align:center;font-size:clamp(13px,1.3vw,18px);color:#9b657c;opacity:0;transition:opacity .6s ease}
     .camera-scene.is-shooting .instant-camera{animation:camera-click .34s ease;filter:brightness(1.08) drop-shadow(0 16px 18px rgba(63,52,60,.16))}
     .camera-scene.is-ejecting .polaroid-output{opacity:1;animation:photo-eject 1.65s cubic-bezier(.18,.72,.22,1) forwards}
     .camera-scene.has-photo .polaroid-output{opacity:1;translate:0 86px;transform:rotate(-2.2deg)}
-    .camera-scene.has-photo .polaroid-image img{filter:contrast(1.25) brightness(1.22) saturate(1.04);opacity:1}.camera-scene.has-photo .polaroid-caption{opacity:1}
+    .camera-scene.has-photo .polaroid-image img{filter:none;opacity:1}.camera-scene.has-photo .polaroid-caption{opacity:1}
     .confetti-canvas{position:fixed;inset:0;z-index:9;width:100%;height:100%;pointer-events:none}
     body:has(.camera-scene.focus-mode) .screen.active{animation:none;transform:none}
     .camera-scene.focus-mode{position:fixed;inset:0;z-index:50;width:min(1440px,100vw);height:100dvh;min-height:620px;margin:auto;padding-top:clamp(72px,11vh,112px);background:rgba(255,255,255,.88);backdrop-filter:blur(5px);animation:focus-fade .5s ease both}
@@ -617,7 +617,7 @@
               <img class="instant-camera" loading="lazy" decoding="async" src="./assets/camera/polaroid-onestep2.webp" alt="" aria-hidden="true">
               <button class="photo-back" id="photo-back" aria-label="返回选择穿搭">←</button>
               <figure class="polaroid-output">
-                <div class="polaroid-image"><img id="polaroid-photo" loading="lazy" decoding="async" src="./assets/fourcut/look-01.jpg" alt="拍下的双人合照"></div>
+                <div class="polaroid-image"><img id="polaroid-photo" decoding="async" src="./assets/fourcut/look-01.jpg" alt="拍下的双人合照"></div>
                 <img class="polaroid-frame" loading="lazy" decoding="async" src="./assets/camera/polaroid-frame.webp" alt="">
                 <figcaption class="polaroid-caption" id="polaroid-caption">CITY WALK · PLANET SUSU</figcaption>
               </figure>
@@ -863,7 +863,7 @@
         index++;renderLetterProgress(index);
         if(index>=letterText.length){setTypingSkip(null);target.classList.remove('writing');letterTimer=setTimeout(()=>consent.classList.add('ready'),500);return}
         const character=letterText[index-1];
-        letterTimer=setTimeout(tick,character==='\n'?220:/[，。！？？、…]/.test(character)?180:48);
+        letterTimer=setTimeout(tick,character==='\n'?420:/[，。！？？、…]/.test(character)?320:80);
       };
       letterTimer=setTimeout(tick,320);
     }
@@ -902,6 +902,7 @@
       if(sceneTracks[name]!==undefined&&currentTrack!==sceneTracks[name])setTrack(sceneTracks[name],musicWanted);
       if(name==='memories') requestAnimationFrame(layoutMemorySpiral);
       if(name==='letter') startLetter();
+      if(name==='fourcut')preloadPhoto(selectedPhoto).catch(()=>{});
       if(name==='welcome') startWelcome();
       if(name==='love') resetLove();
       if(name==='epilogue')startEpilogue();
@@ -1033,12 +1034,28 @@
     const lookNames=['CITY WALK','BLUE DATE','SUNDAY CLUB','LITTLE TRIP','MILK TEA DAY','SWEET ESCAPE','ANGEL & DEVIL','SUMMER STORY','MIDNIGHT DATE','OUR FAVORITE'];
     let selectedPhoto='./assets/fourcut/look-01.jpg';
     let shooting=false;
+    const photoLoads=new Map();
+    function preloadPhoto(src){
+      if(photoLoads.has(src))return photoLoads.get(src);
+      const task=new Promise((resolve,reject)=>{
+        const image=new Image();
+        const timer=setTimeout(()=>fail(new Error('Photo loading timed out')),20000);
+        function fail(error){clearTimeout(timer);image.onload=image.onerror=null;reject(error)}
+        image.onload=async()=>{try{if(image.decode)await image.decode();clearTimeout(timer);resolve(image)}catch(error){fail(error)}};
+        image.onerror=()=>fail(new Error('Photo loading failed'));
+        image.src=src;
+      });
+      photoLoads.set(src,task);
+      task.catch(()=>{if(photoLoads.get(src)===task)photoLoads.delete(src)});
+      return task;
+    }
     const cameraHome=document.querySelector('.polaroid-stage');
     function selectLook(option){
       if(shooting) return;
       document.querySelectorAll('.outfit-option').forEach(item=>item.classList.toggle('active',item===option));
       const {look,ext}=option.dataset;
       selectedPhoto=`./assets/fourcut/look-${look}.${ext}`;
+      preloadPhoto(selectedPhoto).catch(()=>{});
       const name=lookNames[Number(look)-1];
       document.querySelector('#selected-look-name').textContent=name;
       document.querySelector('#polaroid-caption').textContent=`${name} · PLANET SUSU`;
@@ -1127,13 +1144,22 @@
         source.start(now+delay);source.stop(now+delay+duration+.01);
       });
     }
-    function shootFourcut(){
+    async function shootFourcut(){
       if(shooting) return;
       prepareShutterAudio();
       shooting=true;
       const scene=document.querySelector('#camera-scene');
       const photo=document.querySelector('#polaroid-photo');
       const button=document.querySelector('#shoot-fourcut');
+      button.disabled=true;button.textContent='照片加载中…';
+      try{
+        await preloadPhoto(selectedPhoto);
+        photo.src=selectedPhoto;
+        if(photo.decode)await photo.decode();
+      }catch(error){
+        shooting=false;button.disabled=false;button.textContent='照片未加载，点此重试';
+        return;
+      }
       scene.classList.remove('is-ejecting','has-photo');
       document.querySelector('.app').appendChild(scene);
       scene.classList.add('focus-mode');
@@ -1143,7 +1169,7 @@
       setTimeout(()=>{scene.classList.add('is-shooting');playShutterSound();launchConfetti();button.textContent='咔嚓！'},620);
       setTimeout(()=>{scene.classList.remove('is-shooting');scene.classList.add('is-ejecting');button.textContent='照片出来啦…'},1080);
       setTimeout(()=>{scene.classList.remove('is-ejecting');scene.classList.add('has-photo')},2400);
-      setTimeout(()=>{button.disabled=false;button.textContent='♡　再拍一张';button.classList.add('is-done');shooting=false},3650);
+      setTimeout(()=>{button.disabled=false;button.textContent='♡　再拍一张';button.classList.add('is-done');shooting=false},4400);
     }
     let exportAssetsPromise;
     function loadExportAssets(){
@@ -1166,7 +1192,7 @@
         const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
         const x=ox+w*.044,y=oy+h*.082,pw=w*.918,ph=h*.731;
         const scale=Math.max(pw/photo.naturalWidth,ph/photo.naturalHeight),sw=pw/scale,sh=ph/scale;
-        ctx.filter='contrast(1.25) brightness(1.22) saturate(1.04)';
+        ctx.filter='none';
         ctx.drawImage(photo,(photo.naturalWidth-sw)/2,(photo.naturalHeight-sh)/2,sw,sh,x,y,pw,ph);
         ctx.filter='none';ctx.globalCompositeOperation='multiply';ctx.drawImage(frame,0,0,w*1.23,h*1.57);ctx.globalCompositeOperation='source-over';
         ctx.fillStyle='#9b657c';ctx.font='46px OanaSoulHand';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(caption,ox+w*.5,oy+h*.945,w*.9);
