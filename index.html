@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Welcome to Planet Susu</title>
   <style>
     @font-face{
@@ -541,6 +541,7 @@
       .cover-launch{left:23%;bottom:12%;font-size:28px}
     }
   </style>
+  <link rel="stylesheet" href="./assets/mobile.css">
 </head>
 <body>
   <main class="app">
@@ -731,7 +732,7 @@
     const sceneTracks={cover:4,welcome:4,letter:4,menu:4,memories:5,love:0,fourcut:3};
     function memoryIsPlaying(){const video=document.querySelector('#memory-video');return !!video&&!video.paused&&!video.ended}
     let musicMessage='',musicRequest=0;
-    function showMusicMessage(message){musicMessage=message;musicStatus.textContent=message;musicToggle.title=message||'背景音乐';musicToggle.setAttribute('aria-label',message||'背景音乐')}
+    function showMusicMessage(message){musicMessage=message;musicStatus.textContent=message;musicToggle.title=message||'背景音乐';musicToggle.setAttribute('aria-label',message||'背景音乐');musicToggle.parentElement.dataset.notice=/开启|失败/.test(message)?message:''}
     function playMusicIfAllowed(){
       if(!musicWanted||memoryIsPlaying())return;
       const request=++musicRequest;
@@ -739,7 +740,7 @@
       bgm.play().then(()=>{if(request===musicRequest){musicMessage='';updateMusicUI()}}).catch(error=>{
         if(request!==musicRequest||!musicWanted||memoryIsPlaying()||error.name==='AbortError')return;
         showMusicMessage(error.name==='NotAllowedError'?'轻点 ♪ 开启音乐':'音乐加载失败，点 ♪ 重试');
-        musicPanel.classList.add('open');musicToggle.setAttribute('aria-expanded','true');
+        // Keep autoplay notices compact; only the music button opens the playlist.
       });
     }
     function setTrack(index,play=true){
@@ -751,6 +752,7 @@
       if(play)playMusicIfAllowed();
     }
     function updateMusicUI(){
+      if(!musicMessage)musicToggle.parentElement.dataset.notice='';
       const playing=!bgm.paused&&!bgm.ended;musicToggle.textContent=playing?'♫':'♪';musicToggle.classList.toggle('is-playing',playing);musicToggle.setAttribute('aria-label',playing?'暂停背景音乐':'播放背景音乐');musicStatus.textContent=musicMessage||(playing?tracks[currentTrack].name.split(' · ')[0]:'');
     }
     function toggleMusic(){
@@ -760,7 +762,7 @@
     }
     bgm.addEventListener('waiting',()=>{if(musicWanted)showMusicMessage('音乐缓冲中…')});
     bgm.addEventListener('playing',()=>{musicMessage='';updateMusicUI()});
-    bgm.addEventListener('error',()=>{if(musicWanted){showMusicMessage('音乐加载失败，点 ♪ 重试');musicPanel.classList.add('open');musicToggle.setAttribute('aria-expanded','true')}});
+    bgm.addEventListener('error',()=>{if(musicWanted)showMusicMessage('音乐加载失败，点 ♪ 重试')});
     bgm.loop=true;
     bgm.addEventListener('play',updateMusicUI);bgm.addEventListener('pause',updateMusicUI);
 
