@@ -718,11 +718,11 @@
       {file:'./assets/bgm/01-thumping.m4a',name:'쿵쿵쿵 · Vincent Blue'},
       {file:'./assets/bgm/02-wo-xiang-wo-hui.m4a',name:'我想我会 · 尹露浠'},
       {file:'./assets/bgm/07-timing-user-full.m4a',name:'Timing · KOYO'},
-      {file:'./assets/bgm/05-opening-user.m4a',name:'开头 BGM · 你提供的版本'},
+      {file:'./assets/bgm/08-opening-full.m4a',name:'开头 BGM · 完整版'},
       {file:'./assets/bgm/06-memories-user.m4a',name:'回忆录 BGM · 你提供的版本'}
     ];
     let currentTrack=4,musicWanted=false;
-    const openingChoice=document.createElement('button');openingChoice.className='track-choice active';openingChoice.dataset.track='4';openingChoice.textContent='开头 BGM · 你提供的版本';
+    const openingChoice=document.createElement('button');openingChoice.className='track-choice active';openingChoice.dataset.track='4';openingChoice.textContent=tracks[4].name;
     document.querySelectorAll('.track-choice').forEach(item=>item.classList.remove('active'));
     musicPanel.insertBefore(openingChoice,musicPanel.querySelector('.track-choice'));
     const memoriesChoice=document.createElement('button');memoriesChoice.className='track-choice';memoriesChoice.dataset.track='5';memoriesChoice.textContent=tracks[5].name;
